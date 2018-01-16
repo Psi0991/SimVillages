@@ -1,0 +1,9 @@
+name: SimVillages
+version: 1.0
+main: com.pyxlhaus.SimVillages.SimVillages
+
+commands:
+  simvillages:
+    usage: /<command>
+    description: Main Command for SimVillages.
+    aliases: [sv]
