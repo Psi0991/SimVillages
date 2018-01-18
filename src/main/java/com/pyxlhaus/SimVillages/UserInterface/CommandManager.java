@@ -3,6 +3,8 @@ package com.pyxlhaus.SimVillages.UserInterface;
 import com.pyxlhaus.SimVillages.Localization;
 import com.pyxlhaus.SimVillages.SVLogger;
 import com.pyxlhaus.SimVillages.SimVillages;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -18,14 +20,17 @@ public class CommandManager implements Listener, CommandExecutor {
     private ActionManager action_manager;
     private Localization text;
     private String Sno_permission;
+    private String Snot_player;
 
-    public CommandManager(SimVillages plugin, SVLogger logger, Localization text){
+    public CommandManager(SimVillages plugin, SVLogger logger, Localization text, ActionManager action_manager){
         this.plugin = plugin;
         this.text = text;
         this.logger = logger;
-        this.action_manager = new ActionManager(plugin, logger, text);
+        this.action_manager = action_manager;
         this.plugin.getCommand("simvillages").setExecutor(this);
-        this.Sno_permission = text.get_text(Localization.Text.SV_PREFIX) + text.get_text(Localization.Text.NO_PERMISSION);
+        this.Sno_permission = text.get_text(Localization.Text.SV_PREFIX) +
+                text.get_text(Localization.Text.NO_PERMISSION);
+        this.Snot_player = text.get_text(Localization.Text.NOT_PLAYER);
         logger.log("Command Manager initialized.", SVLogger.DEBUG);
     }
 
@@ -41,10 +46,16 @@ public class CommandManager implements Listener, CommandExecutor {
                 if(args[0].equalsIgnoreCase("help")){
                     this.help(sender, "");
                 }
+                if(args[0].equalsIgnoreCase("set")){
+                    this.set_pos(sender, "");
+                }
             }
             if(args.length == 2){
                 if(args[0].equalsIgnoreCase("help")){
                     this.help(sender, args[1]);
+                }
+                if(args[0].equalsIgnoreCase("set")){
+                    this.set_pos(sender, args[1]);
                 }
             }
 
@@ -56,18 +67,44 @@ public class CommandManager implements Listener, CommandExecutor {
     }
 
     public void help(CommandSender sender, String command){
-        if(sender.hasPermission("sv.help")) {
+        if(sender.hasPermission("sv.general.help")) {
             String message = "";
             if(command == "") {
                 message = this.action_manager.get_general_help_text();
             }
             else{
-                message = this.action_manager.get__help_not_found_text(command);
+                message = this.action_manager.get_help_not_found_text(command);
             }
 
             sender.sendMessage(message);
         }
         else {
+            sender.sendMessage(Sno_permission);
+        }
+    }
+
+    public void set_pos(CommandSender sender, String command){
+        if(sender.hasPermission("sv.template.setpos")){
+            if(sender instanceof Player){
+                String message = "";
+                Player player = (Player) sender;
+                Block selected_block = player.getLocation().getBlock().getRelative(BlockFace.DOWN);
+                if(command.equalsIgnoreCase("pos1")){
+                    message = this.action_manager.select_pos_1(player, selected_block);
+                }
+                else if(command.equalsIgnoreCase("pos2")){
+                    message = this.action_manager.select_pos_2(player, selected_block);
+                }
+                else {
+                    this.help(sender, "set");
+                }
+                sender.sendMessage(message);
+            }
+            else {
+                logger.log(Snot_player, SVLogger.WARNING);
+            }
+        }
+        else{
             sender.sendMessage(Sno_permission);
         }
     }

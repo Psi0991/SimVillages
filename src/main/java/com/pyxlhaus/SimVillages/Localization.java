@@ -21,7 +21,10 @@ public class Localization {
         SV_HINT_2,          // Hint: Getting Started help
         SV_HINT_3,          // Hint: List of available commands
         NO_PERMISSION,      // Permission denied
-        HELP_NOT_FOUND      // Help not found
+        HELP_NOT_FOUND,     // Help not found
+        POS1_SET,           // Position 1 for selection set
+        POS2_SET,           // Position 2 for selection set
+        NOT_PLAYER,         // Error: Not executed by player
     }
     private Languages Language;
     private boolean error_text_not_found;
@@ -74,22 +77,36 @@ public class Localization {
                         Slocalized_text = ChatColor.DARK_GREEN + "[SimVillages] " + ChatColor.WHITE + "";
                         break;
                     case SV_HINT_1:
-                        Slocalized_text = ChatColor.WHITE + "A shorter way to enter commands is " + ChatColor.BLUE + " /sv <command>" + ChatColor.WHITE + ".";
+                        Slocalized_text = ChatColor.WHITE + "A shorter way to enter commands is " + ChatColor.BLUE
+                                + " /sv <command>" + ChatColor.WHITE + ".";
                         break;
                     case GENERAL_HELP:
-                        Slocalized_text = ChatColor.WHITE + "To get help with a specific command enter" + ChatColor.BLUE + " /simvillages help <command>" + ChatColor.WHITE + ".";
+                        Slocalized_text = ChatColor.WHITE + "To get help with a specific command enter"
+                                + ChatColor.BLUE + " /simvillages help <command>" + ChatColor.WHITE + ".";
                         break;
                     case SV_HINT_2:
-                        Slocalized_text = ChatColor.WHITE + "To get help getting started with" + ChatColor.DARK_GREEN + " SimVillages" + ChatColor.WHITE + " use" + ChatColor.BLUE + " /simvillages start" + ChatColor.WHITE + ".";
+                        Slocalized_text = ChatColor.WHITE + "To get help getting started with"
+                                + ChatColor.DARK_GREEN + " SimVillages" + ChatColor.WHITE + " use"
+                                + ChatColor.BLUE + " /simvillages start" + ChatColor.WHITE + ".";
                         break;
                     case SV_HINT_3:
-                        Slocalized_text = ChatColor.WHITE + "For a list of commands available to you use" + ChatColor.BLUE + " /simvillages list" + ChatColor.WHITE + ".";
+                        Slocalized_text = ChatColor.WHITE + "For a list of commands available to you use"
+                                + ChatColor.BLUE + " /simvillages list" + ChatColor.WHITE + ".";
                         break;
                     case NO_PERMISSION:
                         Slocalized_text = ChatColor.RED + "You do not have permission to do this.";
                         break;
                     case HELP_NOT_FOUND:
                         Slocalized_text = ChatColor.WHITE + "Help for the following command was not found: ";
+                        break;
+                    case POS1_SET:
+                        Slocalized_text = ChatColor.WHITE + "Position 1 selected at " + ChatColor.LIGHT_PURPLE + "";
+                        break;
+                    case POS2_SET:
+                        Slocalized_text = ChatColor.WHITE + "Position 2 selected at " + ChatColor.LIGHT_PURPLE + "";
+                        break;
+                    case NOT_PLAYER:
+                        Slocalized_text = "Command must be executed by player.";
                         break;
                 }
                 break;
