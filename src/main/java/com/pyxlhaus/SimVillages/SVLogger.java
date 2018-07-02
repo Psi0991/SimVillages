@@ -40,7 +40,6 @@ public class SVLogger {
     private boolean Bprint_date;
     private SimVillages plugin;
     private static final DateFormat date_format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    public String test = "test";
 
     /**
      *

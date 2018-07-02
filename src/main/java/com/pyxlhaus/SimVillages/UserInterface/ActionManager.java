@@ -21,8 +21,8 @@ public class ActionManager {
     private SVLogger logger;
     private Localization text;
     private String ENDL;
-    private Map player_pos1;
-    private Map player_pos2;
+    private HashMap<String, Block> player_pos1;
+    private HashMap<String, Block> player_pos2;
 
     public ActionManager(SimVillages plugin, SVLogger logger, Localization text){
         this.plugin = plugin;
@@ -58,7 +58,7 @@ public class ActionManager {
         UUID player_uuid = player.getUniqueId();
         this.player_pos1.put(player_uuid.toString(), selected_block);
         logger.log("Position 1 for " + player.getDisplayName() + "[" + player_uuid.toString() + "] set at " +
-                selected_block.getLocation().toString() + ".", SVLogger.DEBUG);
+                selected_block.getLocation().toString() + ".", SVLogger.INFO);
         response += this.text.get_text(Localization.Text.POS1_SET) + selected_block.getLocation().toString();
         return response;
     }
@@ -68,8 +68,27 @@ public class ActionManager {
         UUID player_uuid = player.getUniqueId();
         this.player_pos2.put(player_uuid.toString(), selected_block);
         logger.log("Position 2 for " + player.getDisplayName() + "[" + player_uuid.toString() + "] set at " +
-                selected_block.getLocation().toString() + ".", SVLogger.DEBUG);
+                selected_block.getLocation().toString() + ".", SVLogger.INFO);
         response += this.text.get_text(Localization.Text.POS2_SET) + selected_block.getLocation().toString();
+        return response;
+    }
+
+    public String save_template(Player player){
+        String response = this.text.get_text(Localization.Text.SV_PREFIX);
+        String player_uuid = player.getUniqueId().toString();
+        if (player_pos1.get(player_uuid) != null) {
+            Location pos_1_location = player_pos1.get(player_uuid).getLocation();
+        }
+        else{
+            response += this.text.get_text(Localization.Text.POS1_NOT_SET) + ENDL;
+        }
+        if (player_pos2.get(player_uuid) != null) {
+            Location pos_2_location = player_pos2.get(player_uuid).getLocation();
+        }
+        else{
+            response += this.text.get_text(Localization.Text.POS2_NOT_SET) + ENDL;
+        }
+
         return response;
     }
 }
