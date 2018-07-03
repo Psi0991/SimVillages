@@ -1,5 +1,6 @@
 package com.pyxlhaus.SimVillages.UserInterface;
 
+import com.pyxlhaus.SimVillages.Buildings.BuildingTemplate;
 import com.pyxlhaus.SimVillages.Localization;
 import com.pyxlhaus.SimVillages.SVLogger;
 import com.pyxlhaus.SimVillages.SimVillages;
@@ -52,6 +53,47 @@ public class ActionManager {
         response += this.text.get_text(Localization.Text.HELP_NOT_FOUND);
         response += ChatColor.BLUE + command + ENDL;
         response += this.text.get_text(Localization.Text.GENERAL_HELP) + ENDL;
+
+        return response;
+    }
+
+
+    public static CardinalDirection get(Player player) {
+        float yaw = player.getLocation().getYaw();
+        if (yaw < 0) {
+            yaw += 360;
+        }
+        if (yaw >= 315 || yaw < 45) {
+            return CardinalDirection.SOUTH;
+        } else if (yaw < 135) {
+            return CardinalDirection.WEST;
+        } else if (yaw < 225) {
+            return CardinalDirection.NORTH;
+        } else if (yaw < 315) {
+            return CardinalDirection.EAST;
+        }
+        return CardinalDirection.NORTH;
+    }
+
+    public String create_new_template(Player player, BuildingTemplate template){
+        String response = this.text.get_text(Localization.Text.SV_PREFIX);
+        Vector dimensions = template.getDimensions();
+        int width = (int)dimensions.getX();
+        int height = (int)dimensions.getY();
+        int depth = (int)dimensions.getZ();
+        CardinalDirection direction = get(player);
+        if (direction == CardinalDirection.NORTH){      //facing to -z
+
+        }
+        if (direction == CardinalDirection.SOUTH){      //facing to +z
+
+        }
+        if (direction == CardinalDirection.WEST){      //facing to -x
+
+        }
+        if (direction == CardinalDirection.EAST){      //facing to -x
+
+        }
 
         return response;
     }
@@ -153,32 +195,27 @@ public class ActionManager {
                 response += text.get_text(Localization.Text.SCANNING_TEMPLATE);
                 logger.log(player.getDisplayName() + "[" + player_uuid.toString() + "] is scanning " +
                         String.valueOf(block_count) + " blocks.", SVLogger.INFO);
-                Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
-                    @Override
-                    public void run() {
-                        int block_counter = 0;
-                        HashMap<Vector, Block> temp_template = new HashMap();
-                        Vector block_position = new Vector(0d, 0d, 0d);
-                        for (int y = min_y; y <= max_y; y++){
-                            block_position.setY(y - min_y);
-                            for (int x = min_x; x <= max_x; x++){
-                                block_position.setX(x - min_x);
-                                for (int z = min_z; z <= max_z; z++){
-                                    block_position.setZ(z - min_z);
-                                    block_counter++;
-                                    Location block_scan_location = new Location(template_world, (double)x, (double)y,
-                                            (double)z);
-                                    Block scan_block = block_scan_location.getBlock();
-                                    temp_template.put(block_position.clone(), scan_block);
-                                }
+                Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                    HashMap<Vector, Block> temp_template = new HashMap();
+                    Vector block_position = new Vector(0d, 0d, 0d);
+                    for (int y = min_y; y <= max_y; y++){
+                        block_position.setY(y - min_y);
+                        for (int x = min_x; x <= max_x; x++){
+                            block_position.setX(x - min_x);
+                            for (int z = min_z; z <= max_z; z++){
+                                block_position.setZ(z - min_z);
+                                Location block_scan_location = new Location(template_world, (double)x, (double)y,
+                                        (double)z);
+                                Block scan_block = block_scan_location.getBlock();
+                                temp_template.put(block_position.clone(), scan_block);
                             }
                         }
-                        logger.log("Template Size: " + String.valueOf(temp_template.size()), SVLogger.INFO);
-                        String message = text.get_text(Localization.Text.SV_PREFIX);
-                        message += text.get_text(Localization.Text.SCAN_COMPLETED);
-
-                        player.sendMessage(message);
                     }
+                    logger.log("Template Size: " + String.valueOf(temp_template.size()), SVLogger.INFO);
+                    String message = text.get_text(Localization.Text.SV_PREFIX);
+                    message += text.get_text(Localization.Text.SCAN_COMPLETED);
+
+                    player.sendMessage(message);
                 });
             }
         }
