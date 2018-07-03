@@ -96,7 +96,7 @@ public class ActionManager {
         }
         if (player_pos2.get(player_uuid) != null) {
             pos_2_location = player_pos2.get(player_uuid).getLocation().toVector();
-            pos2_world = player_pos1.get(player_uuid).getWorld();
+            pos2_world = player_pos2.get(player_uuid).getWorld();
         }
         else{
             response += this.text.get_text(Localization.Text.POS2_NOT_SET);
@@ -106,20 +106,22 @@ public class ActionManager {
             response += this.text.get_text(Localization.Text.POS_WORLD_NO_MATCH);
         }
         else{
-            double x_distance = new Vector(pos_1_location.getX(), 0, 0).distance(new Vector(pos_2_location.getX(), 0, 0));
-            double y_distance = new Vector(0, pos_1_location.getY(), 0).distance(new Vector(0, pos_2_location.getY(), 0));
-            double z_distance = new Vector(0, 0, pos_1_location.getZ()).distance(new Vector(0, 0, pos_2_location.getZ()));
+            if (!fail){
+                double x_distance = (new Vector(pos_1_location.getX(), 0, 0).distance(new Vector(pos_2_location.getX(), 0, 0))) + 1d;
+                double y_distance = (new Vector(0, pos_1_location.getY(), 0).distance(new Vector(0, pos_2_location.getY(), 0))) + 1d;
+                double z_distance = (new Vector(0, 0, pos_1_location.getZ()).distance(new Vector(0, 0, pos_2_location.getZ()))) + 1d;
 
-            Vector dimensions = new Vector(x_distance, y_distance, z_distance).add(new Vector(1d, 1d, 1d));
+                int block_count = (int)x_distance * (int)y_distance * (int)z_distance;
+                Vector dimensions = new Vector(x_distance, y_distance, z_distance);
 
-            logger.log(dimensions.toString(), SVLogger.DEBUG);
-            response += "Template is being scanned.";
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
-                @Override
-                public void run() {
-                    logger.log("Running Scanning Thread", SVLogger.DEBUG);
-                }
-            });
+                response += "Template is being scanned.";
+                Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+                    @Override
+                    public void run() {
+                        logger.log("Running Scanning Thread", SVLogger.DEBUG);
+                    }
+                });
+            }
         }
         return response;
     }
