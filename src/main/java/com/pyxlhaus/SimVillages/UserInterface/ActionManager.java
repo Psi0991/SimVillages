@@ -3,13 +3,16 @@ package com.pyxlhaus.SimVillages.UserInterface;
 import com.pyxlhaus.SimVillages.Localization;
 import com.pyxlhaus.SimVillages.SVLogger;
 import com.pyxlhaus.SimVillages.SimVillages;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -53,9 +56,10 @@ public class ActionManager {
         return response;
     }
 
-    public String select_pos_1(Player player, Block selected_block){
+    public String select_pos_1(Player player){
         String response = this.text.get_text(Localization.Text.SV_PREFIX);
         UUID player_uuid = player.getUniqueId();
+        Block selected_block = player.getLocation().getBlock().getRelative(BlockFace.DOWN);
         this.player_pos1.put(player_uuid.toString(), selected_block);
         logger.log("Position 1 for " + player.getDisplayName() + "[" + player_uuid.toString() + "] set at " +
                 selected_block.getLocation().toString() + ".", SVLogger.INFO);
@@ -63,9 +67,10 @@ public class ActionManager {
         return response;
     }
 
-    public String select_pos_2(Player player, Block selected_block){
+    public String select_pos_2(Player player){
         String response = this.text.get_text(Localization.Text.SV_PREFIX);
         UUID player_uuid = player.getUniqueId();
+        Block selected_block = player.getLocation().getBlock().getRelative(BlockFace.DOWN);
         this.player_pos2.put(player_uuid.toString(), selected_block);
         logger.log("Position 2 for " + player.getDisplayName() + "[" + player_uuid.toString() + "] set at " +
                 selected_block.getLocation().toString() + ".", SVLogger.INFO);
@@ -74,21 +79,48 @@ public class ActionManager {
     }
 
     public String save_template(Player player){
+        boolean fail = false;
+        World pos1_world = player.getLocation().getWorld();
+        World pos2_world = player.getLocation().getWorld();
+        Vector pos_1_location = player.getLocation().toVector();
+        Vector pos_2_location = player.getLocation().toVector();
         String response = this.text.get_text(Localization.Text.SV_PREFIX);
         String player_uuid = player.getUniqueId().toString();
         if (player_pos1.get(player_uuid) != null) {
-            Location pos_1_location = player_pos1.get(player_uuid).getLocation();
+            pos_1_location = player_pos1.get(player_uuid).getLocation().toVector();
+            pos1_world = player_pos1.get(player_uuid).getWorld();
         }
         else{
             response += this.text.get_text(Localization.Text.POS1_NOT_SET) + ENDL;
+            fail = true;
         }
         if (player_pos2.get(player_uuid) != null) {
-            Location pos_2_location = player_pos2.get(player_uuid).getLocation();
+            pos_2_location = player_pos2.get(player_uuid).getLocation().toVector();
+            pos2_world = player_pos1.get(player_uuid).getWorld();
         }
         else{
-            response += this.text.get_text(Localization.Text.POS2_NOT_SET) + ENDL;
+            response += this.text.get_text(Localization.Text.POS2_NOT_SET);
+            fail = true;
         }
+        if (!fail && (pos1_world != pos2_world)){
+            response += this.text.get_text(Localization.Text.POS_WORLD_NO_MATCH);
+        }
+        else{
+            double x_distance = new Vector(pos_1_location.getX(), 0, 0).distance(new Vector(pos_2_location.getX(), 0, 0));
+            double y_distance = new Vector(0, pos_1_location.getY(), 0).distance(new Vector(0, pos_2_location.getY(), 0));
+            double z_distance = new Vector(0, 0, pos_1_location.getZ()).distance(new Vector(0, 0, pos_2_location.getZ()));
 
+            Vector dimensions = new Vector(x_distance, y_distance, z_distance).add(new Vector(1d, 1d, 1d));
+
+            logger.log(dimensions.toString(), SVLogger.DEBUG);
+            response += "Template is being scanned.";
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+                @Override
+                public void run() {
+                    logger.log("Running Scanning Thread", SVLogger.DEBUG);
+                }
+            });
+        }
         return response;
     }
 }

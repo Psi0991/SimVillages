@@ -16,6 +16,7 @@ public class BuildingTemplate {
     private UnsignedInteger building_stage;
     private String building_name;
     private Vector3 max_dimensions;
+    private char base_orientation;
     public enum BuildingTypes{
         RESIDENTIAL,
         AGRICULTURAL,

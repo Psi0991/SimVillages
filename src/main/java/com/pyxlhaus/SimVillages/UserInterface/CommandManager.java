@@ -49,6 +49,9 @@ public class CommandManager implements Listener, CommandExecutor {
                 if(args[0].equalsIgnoreCase("set")){
                     this.set_pos(sender, "");
                 }
+                if(args[0].equalsIgnoreCase("save")){
+                    this.save_template(sender);
+                }
             }
             if(args.length == 2){
                 if(args[0].equalsIgnoreCase("help")){
@@ -88,12 +91,12 @@ public class CommandManager implements Listener, CommandExecutor {
             if(sender instanceof Player){
                 String message = "";
                 Player player = (Player) sender;
-                Block selected_block = player.getLocation().getBlock().getRelative(BlockFace.DOWN);
+
                 if(command.equalsIgnoreCase("pos1")){
-                    message = this.action_manager.select_pos_1(player, selected_block);
+                    message = this.action_manager.select_pos_1(player);
                 }
                 else if(command.equalsIgnoreCase("pos2")){
-                    message = this.action_manager.select_pos_2(player, selected_block);
+                    message = this.action_manager.select_pos_2(player);
                 }
                 else {
                     this.help(sender, "set");
@@ -109,5 +112,21 @@ public class CommandManager implements Listener, CommandExecutor {
         }
     }
 
+    public void save_template(CommandSender sender){
+        if(sender.hasPermission("sv.template.save")){
+            if(sender instanceof Player){
+                Player player = (Player) sender;
+                String message = this.action_manager.save_template(player);
+                sender.sendMessage(message);
+            }
+            else {
+                logger.log(Snot_player, SVLogger.WARNING);
+            }
+        }
+        else{
+            sender.sendMessage(Sno_permission);
+        }
+
+    }
 
 }

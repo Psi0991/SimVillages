@@ -25,8 +25,9 @@ public class Localization {
         POS1_SET,           // Position 1 for selection set
         POS2_SET,           // Position 2 for selection set
         NOT_PLAYER,         // Error: Not executed by player
-        POS1_NOT_SET,        // Position 1 not set
-        POS2_NOT_SET        // Position 2 not set
+        POS1_NOT_SET,       // Position 1 not set
+        POS2_NOT_SET,       // Position 2 not set
+        POS_WORLD_NO_MATCH, // Position 1 & 2 not in the same world.
     }
     private Languages Language;
     private boolean error_text_not_found;
@@ -111,10 +112,13 @@ public class Localization {
                         Slocalized_text = "Command must be executed by player.";
                         break;
                     case POS1_NOT_SET:
-                        Slocalized_text = ChatColor.RED + "Position 1 was not set.";
+                        Slocalized_text = ChatColor.YELLOW + "Position 1 was not set.";
                         break;
                     case POS2_NOT_SET:
-                        Slocalized_text = ChatColor.RED + "Position 2 was not set.";
+                        Slocalized_text = ChatColor.YELLOW + "Position 2 was not set.";
+                        break;
+                    case POS_WORLD_NO_MATCH:
+                        Slocalized_text = ChatColor.YELLOW + "Position 1 and 2 not set in the same world.";
                         break;
                 }
                 break;
