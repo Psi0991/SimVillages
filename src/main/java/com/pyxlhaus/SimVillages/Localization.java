@@ -27,7 +27,9 @@ public class Localization {
         NOT_PLAYER,         // Error: Not executed by player
         POS1_NOT_SET,       // Position 1 not set
         POS2_NOT_SET,       // Position 2 not set
-        POS_WORLD_NO_MATCH, // Position 1 & 2 not in the same world.
+        POS_WORLD_NO_MATCH, // Position 1 & 2 not in the same world
+        SCANNING_TEMPLATE,  // Template is being scanned
+        SCAN_COMPLETED,     // Scan completed.
     }
     private Languages Language;
     private boolean error_text_not_found;
@@ -119,6 +121,12 @@ public class Localization {
                         break;
                     case POS_WORLD_NO_MATCH:
                         Slocalized_text = ChatColor.YELLOW + "Position 1 and 2 not set in the same world.";
+                        break;
+                    case SCANNING_TEMPLATE:
+                        Slocalized_text = ChatColor.WHITE + "Template is being scanned.";
+                        break;
+                    case SCAN_COMPLETED:
+                            Slocalized_text = ChatColor.WHITE + "Template has been scanned.";
                         break;
                 }
                 break;

@@ -78,19 +78,20 @@ public class ActionManager {
         return response;
     }
 
-    public String save_template(Player player){
+    public String save_template(final Player player){
         boolean fail = false;
         World pos1_world = player.getLocation().getWorld();
         World pos2_world = player.getLocation().getWorld();
         Vector pos_1_location = player.getLocation().toVector();
         Vector pos_2_location = player.getLocation().toVector();
-        String response = this.text.get_text(Localization.Text.SV_PREFIX);
+        String response = "";
         String player_uuid = player.getUniqueId().toString();
         if (player_pos1.get(player_uuid) != null) {
             pos_1_location = player_pos1.get(player_uuid).getLocation().toVector();
             pos1_world = player_pos1.get(player_uuid).getWorld();
         }
         else{
+            response += this.text.get_text(Localization.Text.SV_PREFIX);
             response += this.text.get_text(Localization.Text.POS1_NOT_SET) + ENDL;
             fail = true;
         }
@@ -99,26 +100,84 @@ public class ActionManager {
             pos2_world = player_pos2.get(player_uuid).getWorld();
         }
         else{
+            response += this.text.get_text(Localization.Text.SV_PREFIX);
             response += this.text.get_text(Localization.Text.POS2_NOT_SET);
             fail = true;
         }
         if (!fail && (pos1_world != pos2_world)){
+            response += this.text.get_text(Localization.Text.SV_PREFIX);
             response += this.text.get_text(Localization.Text.POS_WORLD_NO_MATCH);
         }
         else{
             if (!fail){
+                final World template_world = pos1_world;
+                response += this.text.get_text(Localization.Text.SV_PREFIX);
+                final int min_x;
+                final int max_x;
+                final int min_y;
+                final int max_y;
+                final int min_z;
+                final int max_z;
                 double x_distance = (new Vector(pos_1_location.getX(), 0, 0).distance(new Vector(pos_2_location.getX(), 0, 0))) + 1d;
                 double y_distance = (new Vector(0, pos_1_location.getY(), 0).distance(new Vector(0, pos_2_location.getY(), 0))) + 1d;
                 double z_distance = (new Vector(0, 0, pos_1_location.getZ()).distance(new Vector(0, 0, pos_2_location.getZ()))) + 1d;
 
-                int block_count = (int)x_distance * (int)y_distance * (int)z_distance;
+                if (pos_1_location.getX() < pos_2_location.getX()){
+                    min_x = (int)pos_1_location.getX();
+                    max_x = (int)pos_2_location.getX();
+                }
+                else{
+                    min_x = (int)pos_2_location.getX();
+                    max_x = (int)pos_1_location.getX();
+                }
+                if (pos_1_location.getY() < pos_2_location.getY()){
+                    min_y = (int)pos_1_location.getY();
+                    max_y = (int)pos_2_location.getY();
+                }
+                else{
+                    min_y = (int)pos_2_location.getY();
+                    max_y = (int)pos_1_location.getY();
+                }
+                if (pos_1_location.getZ() < pos_2_location.getZ()){
+                    min_z = (int)pos_1_location.getZ();
+                    max_z = (int)pos_2_location.getZ();
+                }
+                else{
+                    min_z = (int)pos_2_location.getZ();
+                    max_z = (int)pos_1_location.getZ();
+                }
+
+                final int block_count = (int)x_distance * (int)y_distance * (int)z_distance;
                 Vector dimensions = new Vector(x_distance, y_distance, z_distance);
 
-                response += "Template is being scanned.";
+                response += text.get_text(Localization.Text.SCANNING_TEMPLATE);
+                logger.log(player.getDisplayName() + "[" + player_uuid.toString() + "] is scanning " +
+                        String.valueOf(block_count) + " blocks.", SVLogger.INFO);
                 Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
                     @Override
                     public void run() {
-                        logger.log("Running Scanning Thread", SVLogger.DEBUG);
+                        int block_counter = 0;
+                        HashMap<Vector, Block> temp_template = new HashMap();
+                        Vector block_position = new Vector(0d, 0d, 0d);
+                        for (int y = min_y; y <= max_y; y++){
+                            block_position.setY(y - min_y);
+                            for (int x = min_x; x <= max_x; x++){
+                                block_position.setX(x - min_x);
+                                for (int z = min_z; z <= max_z; z++){
+                                    block_position.setZ(z - min_z);
+                                    block_counter++;
+                                    Location block_scan_location = new Location(template_world, (double)x, (double)y,
+                                            (double)z);
+                                    Block scan_block = block_scan_location.getBlock();
+                                    temp_template.put(block_position.clone(), scan_block);
+                                }
+                            }
+                        }
+                        logger.log("Template Size: " + String.valueOf(temp_template.size()), SVLogger.INFO);
+                        String message = text.get_text(Localization.Text.SV_PREFIX);
+                        message += text.get_text(Localization.Text.SCAN_COMPLETED);
+
+                        player.sendMessage(message);
                     }
                 });
             }
