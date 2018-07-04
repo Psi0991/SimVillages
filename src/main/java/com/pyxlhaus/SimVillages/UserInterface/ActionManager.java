@@ -81,6 +81,7 @@ public class ActionManager {
         int width = (int)dimensions.getX();
         int height = (int)dimensions.getY();
         int depth = (int)dimensions.getZ();
+        int half_width = width/2;
         CardinalDirection direction = get(player);
         if (direction == CardinalDirection.NORTH){      //facing to -z
 
