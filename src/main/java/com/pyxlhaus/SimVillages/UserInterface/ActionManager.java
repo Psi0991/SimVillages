@@ -4,10 +4,7 @@ import com.pyxlhaus.SimVillages.Buildings.BuildingTemplate;
 import com.pyxlhaus.SimVillages.Localization;
 import com.pyxlhaus.SimVillages.SVLogger;
 import com.pyxlhaus.SimVillages.SimVillages;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -78,22 +75,72 @@ public class ActionManager {
     public String create_new_template(Player player, BuildingTemplate template){
         String response = this.text.get_text(Localization.Text.SV_PREFIX);
         Vector dimensions = template.getDimensions();
-        int width = (int)dimensions.getX();
-        int height = (int)dimensions.getY();
-        int depth = (int)dimensions.getZ();
+        Location player_location = player.getLocation().getBlock().getLocation();
+        World player_world = player_location.getWorld();
+
+        int min_x = 0;
+        int max_x = 0;
+        int min_y = 0;
+        int max_y = 0;
+        int min_z = 0;
+        int max_z = 0;
+
+        int width = (int)dimensions.getX() - 1;
+        int height = (int)dimensions.getY() - 1;
+        int depth = (int)dimensions.getZ() - 1;
         int half_width = width/2;
+
         CardinalDirection direction = get(player);
         if (direction == CardinalDirection.NORTH){      //facing to -z
-
+            min_x = (int)player_location.getX() - half_width;
+            max_x = (int)player_location.getX() + (width - half_width);
+            min_y = (int)player_location.getY();
+            max_y = (int)player_location.getY() + height;
+            max_z = (int)player_location.getZ() - 2;
+            min_z = (int)player_location.getZ() - depth -2;
         }
         if (direction == CardinalDirection.SOUTH){      //facing to +z
-
+            min_x = (int)player_location.getX() - half_width;
+            max_x = (int)player_location.getX() + (width - half_width);
+            min_y = (int)player_location.getY();
+            max_y = (int)player_location.getY() + height;
+            min_z = (int)player_location.getZ() + 2;
+            max_z = (int)player_location.getZ() + depth + 2;
         }
         if (direction == CardinalDirection.WEST){      //facing to -x
-
+            max_x = (int)player_location.getX() - 2;
+            min_x = (int)player_location.getX() - depth - 2;
+            min_y = (int)player_location.getY();
+            max_y = (int)player_location.getY() + height;
+            min_z = (int)player_location.getZ() - half_width;
+            max_z = (int)player_location.getZ() + (width - half_width);
         }
-        if (direction == CardinalDirection.EAST){      //facing to -x
+        if (direction == CardinalDirection.EAST){      //facing to +x
+            min_x = (int)player_location.getX() + 2;
+            max_x = (int)player_location.getX() + depth + 2;
+            min_y = (int)player_location.getY();
+            max_y = (int)player_location.getY() + height;
+            min_z = (int)player_location.getZ() - half_width;
+            max_z = (int)player_location.getZ() + (width - half_width);
+        }
 
+        Vector min_pos = new Vector((double)min_x, (double)min_y, (double)min_z);
+        Vector max_pos = new Vector((double)max_x, (double)max_y, (double)max_z);
+        Vector min_border_pos = new Vector((double)min_x -1, (double)min_y - 1, (double)min_z - 1);
+        Vector max_border_pos = new Vector((double)max_x + 1, (double)max_y + 1, (double)max_z + 1);
+
+        for (int x = min_x - 1; x <= max_x + 1; x++){
+            for (int y = min_y - 1; y <= max_y + 1; y++){
+                for (int z = min_z - 1; z <= max_z + 1; z++){
+                    if (((x == min_x-1 || x == max_x+1) && (z == min_z-1 || z == max_z+1)) ||
+                            ((x == min_x-1 || x == max_x+1 || z == min_z-1 || z == max_z+1) &&
+                                    (y == min_y-1 || y == max_y+1))){
+                        Block border_block = player_world.getBlockAt(new Location(player_world, (double)x, (double)y,
+                                (double)z));
+                        border_block.setType(Material.BEDROCK);
+                    }
+                }
+            }
         }
 
         return response;
@@ -196,27 +243,30 @@ public class ActionManager {
                 response += text.get_text(Localization.Text.SCANNING_TEMPLATE);
                 logger.log(player.getDisplayName() + "[" + player_uuid.toString() + "] is scanning " +
                         String.valueOf(block_count) + " blocks.", SVLogger.INFO);
-                Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                    HashMap<Vector, Block> temp_template = new HashMap();
-                    Vector block_position = new Vector(0d, 0d, 0d);
-                    for (int y = min_y; y <= max_y; y++){
-                        block_position.setY(y - min_y);
-                        for (int x = min_x; x <= max_x; x++){
-                            block_position.setX(x - min_x);
-                            for (int z = min_z; z <= max_z; z++){
-                                block_position.setZ(z - min_z);
-                                Location block_scan_location = new Location(template_world, (double)x, (double)y,
-                                        (double)z);
-                                Block scan_block = block_scan_location.getBlock();
-                                temp_template.put(block_position.clone(), scan_block);
+                Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+                    @Override
+                    public void run() {
+                        HashMap<Vector, Block> temp_template = new HashMap();
+                        Vector block_position = new Vector(0d, 0d, 0d);
+                        for (int y = min_y; y <= max_y; y++){
+                            block_position.setY(y - min_y);
+                            for (int x = min_x; x <= max_x; x++){
+                                block_position.setX(x - min_x);
+                                for (int z = min_z; z <= max_z; z++){
+                                    block_position.setZ(z - min_z);
+                                    Location block_scan_location = new Location(template_world, (double)x, (double)y,
+                                            (double)z);
+                                    Block scan_block = block_scan_location.getBlock();
+                                    temp_template.put(block_position.clone(), scan_block);
+                                }
                             }
                         }
-                    }
-                    logger.log("Template Size: " + String.valueOf(temp_template.size()), SVLogger.INFO);
-                    String message = text.get_text(Localization.Text.SV_PREFIX);
-                    message += text.get_text(Localization.Text.SCAN_COMPLETED);
+                        logger.log("Template Size: " + String.valueOf(temp_template.size()), SVLogger.INFO);
+                        String message = text.get_text(Localization.Text.SV_PREFIX);
+                        message += text.get_text(Localization.Text.SCAN_COMPLETED);
 
-                    player.sendMessage(message);
+                        player.sendMessage(message);
+                    }
                 });
             }
         }
